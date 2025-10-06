@@ -1,0 +1,112 @@
+@startuml
+skinparam handwritten false
+skinparam class {
+  BorderColor #5D80D6
+  BackgroundColor #D3E0FF
+  ArrowColor #5D80D6
+  FontColor #1F2937
+}
+
+title "Diagrama de Classes - Sistema de Saúde (Schema 2)"
+
+package "Usuário & Acesso (User/Auth)" {
+  class User {
+    + id: String
+    + name: String
+    + email: String @unique
+    + passwordHash: String
+    + role: UserRole
+    --
+    + professional: Professional?
+    + admin: Admin?
+  }
+  enum UserRole {
+    ADMIN
+    PROFESSIONAL
+    RECEPTIONIST
+    FINANCIAL
+  }
+}
+
+package "Perfis de Acesso (Domain Profiles)" {
+  class Admin {
+    + id: String
+    + userId: String @unique
+  }
+  class Professional {
+    + id: String
+    + userId: String @unique
+    + specialty: String?
+    + crm: String?
+  }
+}
+
+package "Domínio Clínico" {
+  class Patient {
+    + id: String
+    + name: String
+    + cpf: String @unique
+    + birthDate: DateTime
+    --
+    + appointments: Appointment[]
+    + medicalRecord: MedicalRecord?
+  }
+  class Appointment {
+    + id: String
+    + date: DateTime
+    + status: AppointmentStatus
+    --
+    + patientId: String
+    + professionalId: String
+  }
+  class MedicalRecord {
+    + id: String
+    + patientId: String @unique
+    --
+    + entries: MedicalEntry[]
+  }
+  class MedicalEntry {
+    + id: String
+    + description: String
+    + diagnosis: String?
+    + prescription: String?
+    --
+    + recordId: String
+  }
+  class Service {
+    + id: String
+    + name: String
+    + price: Decimal
+  }
+}
+
+package "Auditoria" {
+  class AuditLog {
+    + id: String
+    + action: String
+    + entity: String
+    + createdAt: DateTime
+    --
+    + userId: String?
+  }
+}
+
+' Relações de Usuário/Perfil '
+User "1" <-- "0..1" Professional : é_perfil
+User "1" <-- "0..1" Admin : é_perfil
+User "0..1" <-- "0..*" AuditLog : gerou
+
+' Relações Clínicas '
+Patient "1" -- "1" MedicalRecord : tem
+
+Professional "1" -- "0..*" Appointment : realiza
+Patient "1" -- "0..*" Appointment : agendou
+
+Appointment "0..1" -- "0..1" Payment : paga_por
+
+MedicalRecord "1" -- "0..*" MedicalEntry : contém
+
+Service "0..*" -- "0..*" Appointment : referente_a
+Service "0..*" -- "0..*" Payment : referente_a
+
+@enduml

@@ -13,3 +13,198 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// =========================================================
+// =============== DOMÍNIO: USUÁRIOS E ACESSO ==============
+// =========================================================
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacionamentos
+  professional Professional?
+  admin        Admin?
+  auditLogs    AuditLog[]
+}
+
+model Admin {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Professional {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id])
+  specialty    String?
+  crm          String? // Registro profissional
+  sectorId     String?
+  sector       Sector?       @relation(fields: [sectorId], references: [id])
+  appointments Appointment[]
+}
+
+enum UserRole {
+  ADMIN
+  PROFESSIONAL
+  RECEPTIONIST
+  FINANCIAL
+}
+
+// =========================================================
+// ==================== DOMÍNIO: PACIENTES ==================
+// =========================================================
+
+model Patient {
+  id        String   @id @default(cuid())
+  name      String
+  cpf       String   @unique
+  birthDate DateTime
+  phone     String?
+  email     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  appointments  Appointment[]
+  medicalRecord MedicalRecord?
+  payments      Payment[]
+}
+
+// =========================================================
+// =================== DOMÍNIO: SETORES =====================
+// =========================================================
+
+model Sector {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  professionals Professional[]
+  services      Service[]
+}
+
+// =========================================================
+// ================= DOMÍNIO: CONSULTAS =====================
+// =========================================================
+
+model Appointment {
+  id             String            @id @default(cuid())
+  patientId      String
+  professionalId String
+  date           DateTime
+  status         AppointmentStatus @default(SCHEDULED)
+  notes          String?
+
+  // Relacionamentos
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+  serviceId    String?
+  service      Service?     @relation(fields: [serviceId], references: [id])
+  payment      Payment?
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+  NO_SHOW
+  IN_PROGRESS
+}
+
+// =========================================================
+// =============== DOMÍNIO: PRONTUÁRIO MÉDICO ==============
+// =========================================================
+
+model MedicalRecord {
+  id        String         @id @default(cuid())
+  patientId String         @unique
+  patient   Patient        @relation(fields: [patientId], references: [id])
+  entries   MedicalEntry[]
+}
+
+model MedicalEntry {
+  id           String   @id @default(cuid())
+  recordId     String
+  createdAt    DateTime @default(now())
+  description  String
+  diagnosis    String?
+  prescription String?
+
+  record MedicalRecord @relation(fields: [recordId], references: [id])
+}
+
+// =========================================================
+// =================== DOMÍNIO: SERVIÇOS ====================
+// =========================================================
+
+model Service {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  price        Decimal       @db.Decimal(10, 2)
+  sectorId     String?
+  sector       Sector?       @relation(fields: [sectorId], references: [id])
+  appointments Appointment[]
+  payments     Payment[]
+}
+
+// =========================================================
+// ================== DOMÍNIO: FINANCEIRO ===================
+// =========================================================
+
+model Payment {
+  id            String        @id @default(cuid())
+  patientId     String?
+  appointmentId String?       @unique
+  serviceId     String?
+  amount        Decimal       @db.Decimal(10, 2)
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  referenceCode String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relacionamentos
+  patient     Patient?     @relation(fields: [patientId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+  service     Service?     @relation(fields: [serviceId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+  BANK_TRANSFER
+  INSURANCE
+}
+
+// =========================================================
+// ================= DOMÍNIO: AUDITORIA/LOGS ===============
+// =========================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
