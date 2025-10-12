@@ -21,78 +21,283 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# 🏥 Hospital Management System
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A hospital management system developed with a modular architecture based on DDD (Domain-Driven Design) and Node.js design patterns.
 
-## Project setup
+---
 
+## 🏗️ Architecture and Patterns
+
+### Architecture: Modular Monolith
+- Modular structure by business domains  
+- Clear separation of responsibilities  
+- Low coupling between modules  
+- High cohesion within modules  
+
+### DDD (Domain-Driven Design)
+- Domain-oriented modeling focused on healthcare  
+- Entities, Value Objects, and Aggregates  
+- Ubiquitous language across domains  
+- Well-defined Bounded Contexts  
+
+### Node.js Design Patterns
+- Dependency Injection  
+- Repository Pattern  
+- Service Layer  
+- Factory Pattern  
+- Strategy Pattern  
+
+---
+
+## Technologies Used
+
+### Backend
+- **NestJS** – Modular Node.js framework  
+- **TypeScript** – Typed superset of JavaScript  
+- **Prisma** – Type-safe ORM  
+- **PostgreSQL** – Relational database  
+- **JWT** – Token-based authentication  
+- **bcrypt** – Password hashing  
+- **class-validator** – DTO validation  
+- **class-transformer** – Object transformation  
+
+### Infrastructure
+- **Docker** – Containerization  
+- **Docker Compose** – Container orchestration  
+- **PostgreSQL** – Database  
+
+---
+
+## System Domains
+
+### Core Domains
+- **Auth** – Authentication and authorization  
+- **Users** – User and role management  
+- **Patients** – Patient registration and management  
+- **Appointments** – Scheduling of consultations  
+
+### Supporting Domains
+- **Clinical** – Medical records and prescriptions  
+- **Finance** – Payments and invoices  
+- **Telemedicine** – Remote consultations  
+
+### Generic Domains
+- **Audit** – Logs and audit trails  
+- **Hospital** – Multi-tenancy management  
+
+---
+
+## Project Initialization
+
+### Prerequisites
+- Node.js 18+  
+- Docker & Docker Compose  
+- npm or yarn  
+
+### 1. Clone and Install Dependencies
 ```bash
-$ yarn install
+git clone <your-repo>
+cd hospital-management
+npm install
 ```
 
-## Compile and run the project
-
+### 2. Configure Environment Variables
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+cp .env.example .env
+```
+Edit the `.env` file with your configuration:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/hospital_db"
+JWT_SECRET=""
+PORT=3000
 ```
 
-## Run tests
-
+### 3. Start Infrastructure with Docker
 ```bash
-# unit tests
-$ yarn run test
+# Start PostgreSQL
+docker-compose up -d
 
-# e2e tests
-$ yarn run test:e2e
+# Check containers
+docker-compose ps
 
-# test coverage
-$ yarn run test:cov
+# Stop containers
+docker-compose down
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 4. Database Setup
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate dev --name init
+
+# Seed database
+npx prisma db seed
+
+# Open Prisma Studio
+npx prisma studio
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 5. Development
+```bash
+# Hot-reload development
+npm run start:dev
 
-## Resources
+# Production build
+npm run build
 
-Check out a few resources that may come in handy when working with NestJS:
+# Start production
+npm run start:prod
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Lint
+npm run lint
 
-## Support
+# Tests
+npm run test
+npm run test:e2e
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## Project Structure
+```text
+src/
+├── auth/                    # Authentication domain
+│   ├── dto/                # Data Transfer Objects
+│   ├── controllers/        # HTTP controllers
+│   ├── services/           # Business logic
+│   └── strategies/         # Auth strategies (JWT, etc.)
+├── users/                  # User domain
+│   ├── entities/           # Domain entities
+│   ├── repositories/       # Repository pattern
+│   └── services/           # Domain services
+├── patients/               # Patient domain
+├── appointments/           # Appointment domain
+├── clinical/               # Clinical domain
+├── finance/                # Financial domain
+├── shared/                 # Shared resources
+│   ├── common/             # Decorators, filters, etc.
+│   └── infrastructure/     # Configs, database
+└── main.ts                 # Entry point
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+## Prisma Commands
+```bash
+# Migration development
+npx prisma migrate dev --name migration_name
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Deploy migrations (production)
+npx prisma migrate deploy
+
+# Reset database (careful!)
+npx prisma migrate reset
+
+# Generate Prisma client
+npx prisma generate
+
+# Browse data
+npx prisma studio
+
+# Run seed
+npx prisma db seed
+```
+
+---
+
+## Testing the Application
+
+### Test Authentication
+```bash
+# Register user
+curl -X POST http://localhost:3000/api/auth/register   -H "Content-Type: application/json"   -d '{
+    "email": "doctor@hospital.com",
+    "fullName": "Dr. John Smith",
+    "password": "password123",
+    "roleId": "role-professional"
+  }'
+
+# Login
+curl -X POST http://localhost:3000/api/auth/login   -H "Content-Type: application/json"   -d '{
+    "email": "doctor@hospital.com",
+    "password": "password123"
+  }'
+```
+
+### Seed Credentials
+- **Admin:** admin@hospital.com / password123  
+- **Doctor:** dr.smith@hospital.com / password123  
+
+---
+
+## Roles and Permissions
+| Role | Description | Permissions |
+|------|--------------|--------------|
+| ADMIN | Administrator | Full system access |
+| PROFESSIONAL | Doctor/Professional | Manage patients, appointments, prescriptions |
+| RECEPTIONIST | Receptionist | Scheduling, patient registration |
+| FINANCIAL | Financial | Payments, invoices, reports |
+
+---
+
+## Data Model
+
+### Main Entities
+- **User:** System users with roles  
+- **Patient:** Patients with medical history  
+- **Appointment:** Consultation scheduling  
+- **Service:** Medical services and pricing  
+- **Payment:** Payment processing  
+- **Prescription:** Medical prescriptions  
+
+### Key Relationships
+- User ↔ Role (M:1)  
+- Patient ↔ Appointment (1:M)  
+- Appointment ↔ Payment (1:1)  
+- User ↔ Patient (M:M via Appointment)  
+
+---
+
+## Security
+- JWT authentication  
+- Password hashing with bcrypt  
+- Data validation with class-validator  
+- CORS configured  
+- Rate limiting (to be implemented)  
+
+---
+
+## Next Steps
+
+### Planned Improvements
+- Redis caching  
+- BullMQ for async jobs  
+- File uploads (exams, images)  
+- Real-time notifications  
+- API Documentation (Swagger)  
+- Monitoring and logging  
+- Integration and unit tests  
+
+### Domain Expansion
+- Telemedicine (video calls)  
+- Pharmacy and inventory management  
+- Lab reports and diagnostics  
+- Analytical reports  
+
+---
+
+## 🤝 Contribution
+- Follow established coding standards  
+- Maintain DDD and modular architecture  
+- Add tests for new features  
+- Document significant changes  
+
+---
+
+## 📝 License
+This project is for educational and portfolio purposes.
+
+Developed with 💊 for efficient hospital management.

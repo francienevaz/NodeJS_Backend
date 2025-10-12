@@ -1,17 +1,26 @@
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
-import { UserRole } from '@prisma/client'; // Reutilize o enum do Prisma
+// src/auth/dto/register.dto.ts
+import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 
 export class RegisterDto {
     @IsEmail()
     email: string;
 
     @IsString()
-    name: string;
+    @MinLength(2)
+    fullName: string; // Mudou de 'name' para 'fullName'
 
     @IsString()
     @MinLength(6)
     password: string;
 
-    @IsEnum(UserRole)
-    role: UserRole; // Define o papel do usuário (ADMIN, PROFESSIONAL, etc.)
+    @IsString()
+    roleId: string; // Mudou de 'role' para 'roleId'
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsOptional()
+    @IsString()
+    hospitalId?: string;
 }
