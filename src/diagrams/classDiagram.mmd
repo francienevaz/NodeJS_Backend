@@ -1,0 +1,264 @@
+classDiagram
+direction LR
+
+%% =========================
+%% AUTH DOMAIN
+%% =========================
+class AuthToken {
+  +id: UUID
+  +userId: UUID
+  +token: string
+  +expiresAt: Date
+  +isRevoked: boolean
+  +createdAt: Date
+  +updatedAt: Date
+  +generateToken(): string
+  +revoke(): void
+}
+
+class Role {
+  +id: UUID
+  +name: string
+  +description: string
+}
+
+AuthToken "0..*" <-- "1" User : "belongs to"
+User "1" --> "1" Role : "has one"
+Role "1" --> "0..*" User : "assigned to"
+
+%% =========================
+%% USER DOMAIN
+%% =========================
+class User {
+  +id: UUID
+  +email: string
+  +passwordHash: string
+  +fullName: string
+  +phone?: string
+  +isActive: boolean
+  +roleId: UUID
+  +hospitalId?: UUID
+  +createdAt: Date
+  +updatedAt: Date
+  +verifyPassword(password: string): boolean
+  +deactivate(): void
+}
+
+User "1" --> "0..*" Appointment : "doctor in"
+User "1" --> "0..*" Prescription : "issues"
+User "1" --> "0..*" MedicalNote : "writes"
+User "1" --> "0..*" TeleSession : "conducts"
+User "0..*" --> "1" Hospital : "belongs to"
+User "0..1" --> "0..*" AuditLog : "generates"
+
+%% =========================
+%% PATIENT DOMAIN
+%% =========================
+class Patient {
+  +id: UUID
+  +fullName: string
+  +birthDate: Date
+  +cpf: string
+  +phone: string
+  +email?: string
+  +address?: string
+  +medicalRecordNumber?: string
+  +hospitalId?: UUID
+  +createdAt: Date
+  +updatedAt: Date
+  +getAge(): number
+}
+
+Patient "0..*" --> "1" Hospital : "belongs to"
+Patient "1" --> "0..*" Appointment : "has many"
+Patient "1" --> "0..*" Payment : "makes"
+Patient "1" --> "0..*" Prescription : "receives"
+Patient "1" --> "0..*" MedicalNote : "has notes"
+Patient "1" --> "0..*" TeleSession : "attends"
+
+%% =========================
+%% SERVICES DOMAIN
+%% =========================
+class Service {
+  +id: UUID
+  +name: string
+  +description: string
+  +price: Float
+  +durationMinutes: Int
+  +isActive: boolean
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+Service "1" --> "0..*" Appointment : "requested in"
+
+%% =========================
+%% APPOINTMENT DOMAIN
+%% =========================
+class Appointment {
+  +id: UUID
+  +patientId: UUID
+  +serviceId: UUID
+  +doctorId: UUID
+  +scheduledAt: Date
+  +status: AppointmentStatus
+  +notes?: string
+  +createdAt: Date
+  +updatedAt: Date
+  +cancel(reason: string): void
+  +markAsCompleted(): void
+}
+
+Appointment "1" --> "1" Patient : "belongs to"
+Appointment "1" --> "1" Service : "refers to"
+Appointment "1" --> "1" User : "doctor"
+Appointment "1" --> "0..1" Payment : "may generate"
+
+%% =========================
+%% FINANCE DOMAIN
+%% =========================
+class Payment {
+  +id: UUID
+  +appointmentId: UUID
+  +patientId: UUID
+  +amount: Float
+  +method: PaymentMethod
+  +status: PaymentStatus
+  +transactionId?: string
+  +paidAt?: Date
+  +createdAt: Date
+  +updatedAt: Date
+  +markAsPaid(): void
+  +refund(): void
+}
+
+class Invoice {
+  +id: UUID
+  +paymentId: UUID
+  +issuedAt: Date
+  +dueDate: Date
+  +totalAmount: Float
+  +pdfUrl?: string
+  +createdAt: Date
+  +updatedAt: Date
+  +generateInvoice(): string
+}
+
+Payment "1" --> "1" Appointment : "refers to"
+Payment "1" --> "1" Patient : "belongs to"
+Payment "1" --> "0..1" Invoice : "generates"
+Invoice "0..1" <-- "1" Payment : "belongs to"
+
+%% =========================
+%% CLINICAL RECORDS DOMAIN
+%% =========================
+class MedicalNote {
+  +id: UUID
+  +patientId: UUID
+  +doctorId: UUID
+  +content: string
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+class Prescription {
+  +id: UUID
+  +patientId: UUID
+  +doctorId: UUID
+  +medication: string
+  +dosage: string
+  +instructions?: string
+  +status: PrescriptionStatus
+  +issuedAt: Date
+  +expiresAt?: Date
+}
+
+MedicalNote "0..*" <-- "1" Patient : "for patient"
+MedicalNote "0..*" <-- "1" User : "authored by"
+Prescription "0..*" <-- "1" Patient : "for patient"
+Prescription "0..*" <-- "1" User : "issued by"
+
+%% =========================
+%% TELEMEDICINE DOMAIN
+%% =========================
+class TeleSession {
+  +id: UUID
+  +patientId: UUID
+  +doctorId: UUID
+  +startTime: Date
+  +endTime?: Date
+  +sessionUrl: string
+  +recordingUrl?: string
+  +notes?: string
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+TeleSession "0..*" --> "1" Patient : "belongs to"
+TeleSession "0..*" --> "1" User : "hosted by doctor"
+
+%% =========================
+%% MULTI-HOSPITAL DOMAIN
+%% =========================
+class Hospital {
+  +id: UUID
+  +name: string
+  +cnpj: string
+  +address: string
+  +phone?: string
+  +email?: string
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+Hospital "1" --> "0..*" User : "employs"
+Hospital "1" --> "0..*" Patient : "serves"
+
+%% =========================
+%% AUDIT DOMAIN
+%% =========================
+class AuditLog {
+  +id: UUID
+  +userId?: UUID
+  +action: string
+  +entity: string
+  +entityId?: UUID
+  +timestamp: Date
+  +metadata?: JSON
+}
+
+AuditLog "0..*" <-- "0..1" User : "performed by"
+
+%% =========================
+%% ENUMS
+%% =========================
+class AppointmentStatus {
+  <<enumeration>>
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+class PaymentMethod {
+  <<enumeration>>
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+  TRANSFER
+}
+
+class PaymentStatus {
+  <<enumeration>>
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+class PrescriptionStatus {
+  <<enumeration>>
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}

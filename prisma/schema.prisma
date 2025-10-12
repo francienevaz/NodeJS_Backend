@@ -14,43 +14,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// =========================================================
-// =============== DOMÍNIO: USUÁRIOS E ACESSO ==============
-// =========================================================
-
-model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         UserRole
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relacionamentos
-  professional Professional?
-  admin        Admin?
-  auditLogs    AuditLog[]
-}
-
-model Admin {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-}
-
-model Professional {
-  id           String        @id @default(cuid())
-  userId       String        @unique
-  user         User          @relation(fields: [userId], references: [id])
-  specialty    String?
-  crm          String? // Registro profissional
-  sectorId     String?
-  sector       Sector?       @relation(fields: [sectorId], references: [id])
-  appointments Appointment[]
-}
-
+// ==========================================
+// ENUMS
+// ==========================================
 enum UserRole {
   ADMIN
   PROFESSIONAL
@@ -58,153 +24,235 @@ enum UserRole {
   FINANCIAL
 }
 
-// =========================================================
-// ==================== DOMÍNIO: PACIENTES ==================
-// =========================================================
-
-model Patient {
-  id        String   @id @default(cuid())
-  name      String
-  cpf       String   @unique
-  birthDate DateTime
-  phone     String?
-  email     String?
-  address   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relacionamentos
-  appointments  Appointment[]
-  medicalRecord MedicalRecord?
-  payments      Payment[]
-}
-
-// =========================================================
-// =================== DOMÍNIO: SETORES =====================
-// =========================================================
-
-model Sector {
-  id            String         @id @default(cuid())
-  name          String
-  description   String?
-  professionals Professional[]
-  services      Service[]
-}
-
-// =========================================================
-// ================= DOMÍNIO: CONSULTAS =====================
-// =========================================================
-
-model Appointment {
-  id             String            @id @default(cuid())
-  patientId      String
-  professionalId String
-  date           DateTime
-  status         AppointmentStatus @default(SCHEDULED)
-  notes          String?
-
-  // Relacionamentos
-  patient      Patient      @relation(fields: [patientId], references: [id])
-  professional Professional @relation(fields: [professionalId], references: [id])
-  serviceId    String?
-  service      Service?     @relation(fields: [serviceId], references: [id])
-  payment      Payment?
-}
-
 enum AppointmentStatus {
   SCHEDULED
   COMPLETED
-  CANCELED
-  NO_SHOW
-  IN_PROGRESS
+  CANCELLED
 }
 
-// =========================================================
-// =============== DOMÍNIO: PRONTUÁRIO MÉDICO ==============
-// =========================================================
-
-model MedicalRecord {
-  id        String         @id @default(cuid())
-  patientId String         @unique
-  patient   Patient        @relation(fields: [patientId], references: [id])
-  entries   MedicalEntry[]
-}
-
-model MedicalEntry {
-  id           String   @id @default(cuid())
-  recordId     String
-  createdAt    DateTime @default(now())
-  description  String
-  diagnosis    String?
-  prescription String?
-
-  record MedicalRecord @relation(fields: [recordId], references: [id])
-}
-
-// =========================================================
-// =================== DOMÍNIO: SERVIÇOS ====================
-// =========================================================
-
-model Service {
-  id           String        @id @default(cuid())
-  name         String
-  description  String?
-  price        Decimal       @db.Decimal(10, 2)
-  sectorId     String?
-  sector       Sector?       @relation(fields: [sectorId], references: [id])
-  appointments Appointment[]
-  payments     Payment[]
-}
-
-// =========================================================
-// ================== DOMÍNIO: FINANCEIRO ===================
-// =========================================================
-
-model Payment {
-  id            String        @id @default(cuid())
-  patientId     String?
-  appointmentId String?       @unique
-  serviceId     String?
-  amount        Decimal       @db.Decimal(10, 2)
-  method        PaymentMethod
-  status        PaymentStatus @default(PENDING)
-  referenceCode String?       @unique
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  // Relacionamentos
-  patient     Patient?     @relation(fields: [patientId], references: [id])
-  appointment Appointment? @relation(fields: [appointmentId], references: [id])
-  service     Service?     @relation(fields: [serviceId], references: [id])
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+  TRANSFER
 }
 
 enum PaymentStatus {
   PENDING
-  PAID
-  CANCELED
-  REFUNDED
+  COMPLETED
   FAILED
+  REFUNDED
 }
 
-enum PaymentMethod {
-  CASH
-  CREDIT_CARD
-  DEBIT_CARD
-  PIX
-  BANK_TRANSFER
-  INSURANCE
+enum PrescriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
 }
 
-// =========================================================
-// ================= DOMÍNIO: AUDITORIA/LOGS ===============
-// =========================================================
+// ==========================================
+// DOMAIN: AUTH
+// ==========================================
+model AuthToken {
+  id         String   @id @default(uuid())
+  token      String
+  expiresAt  DateTime
+  isRevoked  Boolean  @default(false)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
 
+// ==========================================
+// DOMAIN: USERS
+// ==========================================
+model Role {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String?
+  users       User[]
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  isActive     Boolean       @default(true)
+  roleId       String
+  role         Role          @relation(fields: [roleId], references: [id])
+  tokens       AuthToken[]
+  appointments Appointment[] @relation("DoctorAppointments")
+  auditLogs    AuditLog[]
+  prescriptions Prescription[]
+  medicalNotes  MedicalNote[]
+  teleSessions  TeleSession[] @relation("DoctorTeleSessions")
+  hospitalId    String?
+  hospital      Hospital?      @relation(fields: [hospitalId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ==========================================
+// DOMAIN: PATIENT
+// ==========================================
+model Patient {
+  id                  String         @id @default(uuid())
+  fullName            String
+  cpf                 String         @unique
+  birthDate           DateTime
+  phone               String
+  email               String?
+  address             String?
+  medicalRecordNumber String?
+  appointments        Appointment[]
+  payments            Payment[]
+  prescriptions       Prescription[]
+  medicalNotes        MedicalNote[]
+  teleSessions        TeleSession[]  @relation("PatientTeleSessions")
+  hospitalId          String?
+  hospital            Hospital?      @relation(fields: [hospitalId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ==========================================
+// DOMAIN: CLINICAL / SERVICES
+// ==========================================
+model Service {
+  id             String        @id @default(uuid())
+  name           String
+  description    String?
+  price          Decimal        @db.Decimal(10, 2)
+  durationMinutes Int
+  isActive       Boolean        @default(true)
+  appointments   Appointment[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Appointment {
+  id          String             @id @default(uuid())
+  patientId   String
+  serviceId   String
+  doctorId    String
+  scheduledAt DateTime
+  status      AppointmentStatus  @default(SCHEDULED)
+  notes       String?
+  patient     Patient            @relation(fields: [patientId], references: [id])
+  service     Service            @relation(fields: [serviceId], references: [id])
+  doctor      User               @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  payment     Payment?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// DOMAIN: FINANCE
+// ==========================================
+model Payment {
+  id            String   @id @default(uuid())
+  appointmentId String   @unique
+  patientId     String
+  amount        Decimal  @db.Decimal(10, 2)
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String?
+  paidAt        DateTime?
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  patient       Patient     @relation(fields: [patientId], references: [id])
+  invoice       Invoice?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Invoice {
+  id          String   @id @default(uuid())
+  paymentId   String   @unique
+  issuedAt    DateTime @default(now())
+  dueDate     DateTime
+  totalAmount Decimal  @db.Decimal(10, 2)
+  pdfUrl      String?
+  payment     Payment  @relation(fields: [paymentId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// DOMAIN: CLINICAL RECORDS / PRESCRIPTIONS
+// ==========================================
+model MedicalNote {
+  id         String    @id @default(uuid())
+  patientId  String
+  doctorId   String
+  content    String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  patient    Patient   @relation(fields: [patientId], references: [id])
+  doctor     User      @relation(fields: [doctorId], references: [id])
+}
+
+model Prescription {
+  id          String             @id @default(uuid())
+  patientId   String
+  doctorId    String
+  medication  String
+  dosage      String
+  instructions String?
+  status      PrescriptionStatus @default(ACTIVE)
+  issuedAt    DateTime @default(now())
+  expiresAt   DateTime?
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  doctor      User     @relation(fields: [doctorId], references: [id])
+}
+
+// ==========================================
+// DOMAIN: TELEMEDICINE
+// ==========================================
+model TeleSession {
+  id            String    @id @default(uuid())
+  patientId     String
+  doctorId      String
+  startTime     DateTime
+  endTime       DateTime?
+  sessionUrl    String     // Link seguro (ex: WebRTC, Jitsi, etc.)
+  notes         String?
+  recordingUrl  String?
+  patient       Patient    @relation("PatientTeleSessions", fields: [patientId], references: [id])
+  doctor        User       @relation("DoctorTeleSessions", fields: [doctorId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ==========================================
+// DOMAIN: MULTI-HOSPITAL / SCALABILITY
+// ==========================================
+model Hospital {
+  id          String    @id @default(uuid())
+  name        String
+  cnpj        String    @unique
+  address     String
+  phone       String?
+  email       String?
+  users       User[]
+  patients    Patient[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// DOMAIN: AUDIT
+// ==========================================
 model AuditLog {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String?
   action    String
   entity    String
   entityId  String?
-  createdAt DateTime @default(now())
-  user      User?    @relation(fields: [userId], references: [id])
+  metadata  Json?
+  timestamp DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
