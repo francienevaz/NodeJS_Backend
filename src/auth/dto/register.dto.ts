@@ -7,14 +7,14 @@ export class RegisterDto {
 
     @IsString()
     @MinLength(2)
-    fullName: string; // Mudou de 'name' para 'fullName'
+    fullName: string;
 
     @IsString()
     @MinLength(6)
     password: string;
 
     @IsString()
-    roleId: string; // Mudou de 'role' para 'roleId'
+    roleId: string;
 
     @IsOptional()
     @IsString()
