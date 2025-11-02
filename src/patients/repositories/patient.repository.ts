@@ -1,22 +1,22 @@
 // src/patients/repositories/patient.repository.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Patient } from '@prisma/client';
+// import { Patient } from '@prisma/client';
 import { CreatePatientDto } from '../dto/create-patient.dto';
 
 @Injectable()
 export class PatientRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(data: CreatePatientDto): Promise<Patient> {
+    async create(data: CreatePatientDto) {
         return this.prisma.patient.create({ data });
     }
 
-    async findByCpf(cpf: string): Promise<Patient | null> {
+    async findByCpf(cpf: string) {
         return this.prisma.patient.findUnique({ where: { cpf } });
     }
 
-    async findById(id: string): Promise<Patient | null> {
+    async findById(id: string) {
         return this.prisma.patient.findUnique({
             where: { id },
             include: {
@@ -27,7 +27,7 @@ export class PatientRepository {
         });
     }
 
-    async findAll(hospitalId?: string): Promise<Patient[]> {
+    async findAll(hospitalId?: string) {
         const where = hospitalId ? { hospitalId } : {};
         return this.prisma.patient.findMany({
             where,
@@ -35,7 +35,7 @@ export class PatientRepository {
         });
     }
 
-    async update(id: string, data: Partial<Patient>): Promise<Patient> {
+    async update(id: string, data) {
         return this.prisma.patient.update({ where: { id }, data });
     }
 }

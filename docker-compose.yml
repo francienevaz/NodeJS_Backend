@@ -1,14 +1,41 @@
-version: '3.9'
+# docker-compose.yml
 services:
-  db:
-    image: postgres:16
-    container_name: hospital_db
-    restart: always
+  postgres:
+    image: postgres:15
+    container_name: hospital_management_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: postgres
+      POSTGRES_DB: hospital_management
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - hospital_postgres_data:/var/lib/postgresql/data
+    networks:
+      - hospital_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d hospital_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: hospital_management_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hospital.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hospital_network
+
+volumes:
+  hospital_postgres_data:
+
+networks:
+  hospital_network:
+    driver: bridge

@@ -2,7 +2,7 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateAppointmentDto } from '../dto/create-appointment.dto';
-import { AppointmentStatus } from '@prisma/client';
+import { AppointmentStatus } from '../../../src/shared/enums/appointment-status.enum';
 
 @Injectable()
 export class AppointmentService {

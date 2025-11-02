@@ -3,7 +3,7 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { HospitalService } from '../services/hospital.service';
 import { CreateHospitalDto } from '../dto/create-hospital.dto';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../../src/shared/enums/payment.enums';
 import { Audit } from '../../audit/decorators/audit.decorator';
 
 @Controller('hospitals')

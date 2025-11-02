@@ -1,14 +1,14 @@
 // src/telemedicine/repositories/tele-session.repository.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { TeleSession } from '@prisma/client';
+// import { TeleSession } from '@prisma/client';
 import { CreateTeleSessionDto } from '../dto/create-tele-session.dto';
 
 @Injectable()
 export class TeleSessionRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(data: CreateTeleSessionDto): Promise<TeleSession> {
+    async create(data: CreateTeleSessionDto) {
         return this.prisma.teleSession.create({
             data,
             include: {
@@ -18,7 +18,7 @@ export class TeleSessionRepository {
         });
     }
 
-    async findById(id: string): Promise<TeleSession | null> {
+    async findById(id: string) {
         return this.prisma.teleSession.findUnique({
             where: { id },
             include: {
@@ -28,7 +28,7 @@ export class TeleSessionRepository {
         });
     }
 
-    async findByPatient(patientId: string): Promise<TeleSession[]> {
+    async findByPatient(patientId: string) {
         return this.prisma.teleSession.findMany({
             where: { patientId },
             include: {
@@ -38,7 +38,7 @@ export class TeleSessionRepository {
         });
     }
 
-    async findByDoctor(doctorId: string): Promise<TeleSession[]> {
+    async findByDoctor(doctorId: string) {
         return this.prisma.teleSession.findMany({
             where: { doctorId },
             include: {
@@ -48,7 +48,7 @@ export class TeleSessionRepository {
         });
     }
 
-    async update(id: string, data: Partial<TeleSession>): Promise<TeleSession> {
+    async update(id: string, data) {
         return this.prisma.teleSession.update({
             where: { id },
             data,
@@ -59,7 +59,7 @@ export class TeleSessionRepository {
         });
     }
 
-    async findUpcomingSessions(): Promise<TeleSession[]> {
+    async findUpcomingSessions() {
         return this.prisma.teleSession.findMany({
             where: {
                 startTime: {

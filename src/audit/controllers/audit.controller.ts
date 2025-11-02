@@ -2,7 +2,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { AuditService } from '../services/audit.service';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../../src/shared/enums/payment.enums';
 
 @Controller('audit')
 @Roles(UserRole.ADMIN)

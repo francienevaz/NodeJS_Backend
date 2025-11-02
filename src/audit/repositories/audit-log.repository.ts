@@ -1,14 +1,14 @@
 // src/audit/repositories/audit-log.repository.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { AuditLog } from '@prisma/client';
+// import { AuditLog } from '@prisma/client';
 import { CreateAuditLogDto } from '../dto/create-audit-log.dto';
 
 @Injectable()
 export class AuditLogRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(data: CreateAuditLogDto): Promise<AuditLog> {
+    async create(data: CreateAuditLogDto) {
         return this.prisma.auditLog.create({
             data: {
                 ...data,
@@ -20,7 +20,7 @@ export class AuditLogRepository {
         });
     }
 
-    async findByUserId(userId: string): Promise<AuditLog[]> {
+    async findByUserId(userId: string) {
         return this.prisma.auditLog.findMany({
             where: { userId },
             include: {
@@ -30,7 +30,7 @@ export class AuditLogRepository {
         });
     }
 
-    async findByEntity(entity: string, entityId?: string): Promise<AuditLog[]> {
+    async findByEntity(entity: string, entityId?: string) {
         const where: any = { entity };
         if (entityId) {
             where.entityId = entityId;
@@ -45,7 +45,7 @@ export class AuditLogRepository {
         });
     }
 
-    async findInDateRange(startDate: Date, endDate: Date): Promise<AuditLog[]> {
+    async findInDateRange(startDate: Date, endDate: Date) {
         return this.prisma.auditLog.findMany({
             where: {
                 timestamp: {

@@ -3,7 +3,7 @@ import { Controller, Get, Post, Body, Param, Patch, Query } from '@nestjs/common
 import { TeleSessionService } from '../services/tele-session.service';
 import { CreateTeleSessionDto } from '../dto/create-tele-session.dto';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../../src/shared/enums/payment.enums';
 
 @Controller('telemedicine')
 export class TeleSessionController {
