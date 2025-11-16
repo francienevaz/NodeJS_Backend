@@ -38,4 +38,10 @@ export class PatientRepository {
     async update(id: string, data) {
         return this.prisma.patient.update({ where: { id }, data });
     }
+
+    async delete(id: string) {
+        return this.prisma.patient.delete({ 
+        where: { id } 
+        });
+    }
 }

@@ -9,7 +9,7 @@ export class CreatePatientDto {
     cpf: string;
 
     @IsDateString()
-    birthDate: Date;
+    birthDate: string;
 
     @IsString()
     phone: string;

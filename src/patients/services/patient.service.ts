@@ -32,6 +32,26 @@ export class PatientService {
         return patients.map(patient => this.toEntity(patient));
     }
 
+    async update(id: string, updatePatientDto: any) {
+        // Check if patient exists
+        const patient = await this.patientRepository.findById(id);
+        if (!patient) {
+        throw new NotFoundException('Patient not found');
+        }
+        
+        return this.patientRepository.update(id, updatePatientDto);
+    }
+
+    async delete(id: string) {
+        // Check if patient exists
+        const patient = await this.patientRepository.findById(id);
+        if (!patient) {
+        throw new NotFoundException('Patient not found');
+        }
+        
+        return this.patientRepository.delete(id);
+    }
+
     private toEntity(patient: any): PatientEntity {
         return {
             id: patient.id,

@@ -103,7 +103,7 @@ model Patient {
   id                  String         @id @default(uuid())
   fullName            String
   cpf                 String         @unique
-  birthDate           DateTime
+  birthDate           String
   phone               String
   email               String?
   address             String?

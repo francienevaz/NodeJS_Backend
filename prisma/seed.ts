@@ -173,7 +173,7 @@ async function main() {
             create: {
                 fullName: 'Carlos Oliveira',
                 cpf: '12345678900',
-                birthDate: new Date('1985-05-15'),
+                birthDate: '1985-05-15',
                 phone: '+551166665555',
                 email: 'carlos@email.com',
                 address: 'Brazil Avenue, 456 - Gardens, São Paulo - SP',
@@ -187,7 +187,7 @@ async function main() {
             create: {
                 fullName: 'Ana Costa',
                 cpf: '98765432100',
-                birthDate: new Date('1990-08-22'),
+                birthDate: '1990-08-22',
                 phone: '+551155554444',
                 email: 'ana@email.com',
                 address: 'Flowers Street, 789 - Downtown, São Paulo - SP',
@@ -201,7 +201,7 @@ async function main() {
             create: {
                 fullName: 'Pedro Almeida',
                 cpf: '45678912300',
-                birthDate: new Date('1978-12-10'),
+                birthDate: '1978-12-10',
                 phone: '+551144443333',
                 email: 'pedro@email.com',
                 address: 'Liberty Avenue, 321 - West Zone, São Paulo - SP',
@@ -218,7 +218,7 @@ async function main() {
             create: {
                 fullName: 'Fernanda Lima',
                 cpf: '78912345600',
-                birthDate: new Date('1992-03-25'),
+                birthDate: '1992-03-25',
                 phone: '+551133332222',
                 email: 'fernanda@email.com',
                 address: 'North Street, 654 - North Zone, São Paulo - SP',
@@ -232,7 +232,7 @@ async function main() {
             create: {
                 fullName: 'Ricardo Souza',
                 cpf: '32165498700',
-                birthDate: new Date('1988-07-18'),
+                birthDate: '1988-07-18',
                 phone: '+551122221111',
                 email: 'ricardo@email.com',
                 address: 'Central Avenue, 987 - Downtown, São Paulo - SP',
