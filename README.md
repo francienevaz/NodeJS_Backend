@@ -164,7 +164,7 @@ npm run test:e2e
 ## Project Structure
 ```text
 src/
-├── auth/                    # Authentication domain
+├── auth/                   # Authentication domain
 │   ├── dto/                # Data Transfer Objects
 │   ├── controllers/        # HTTP controllers
 │   ├── services/           # Business logic

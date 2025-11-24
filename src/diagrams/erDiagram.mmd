@@ -1,0 +1,197 @@
+erDiagram
+    %% =========================
+    %% AUTH DOMAIN
+    %% =========================
+    User {
+        uuid id PK
+        string email UK
+        string passwordHash
+        string fullName
+        string phone
+        boolean isActive
+        uuid roleId FK
+        uuid hospitalId FK
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    Role {
+        uuid id PK
+        string name UK
+        string description
+    }
+    
+    AuthToken {
+        uuid id PK
+        string token
+        datetime expiresAt
+        boolean isRevoked
+        uuid userId FK
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    %% =========================
+    %% PATIENT DOMAIN
+    %% =========================
+    Patient {
+        uuid id PK
+        string fullName
+        string cpf UK
+        string birthDate
+        string phone
+        string email
+        string address
+        string medicalRecordNumber
+        uuid hospitalId FK
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    %% =========================
+    %% CLINICAL DOMAIN
+    %% =========================
+    Service {
+        uuid id PK
+        string name
+        string description
+        decimal price
+        int durationMinutes
+        boolean isActive
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Appointment {
+        uuid id PK
+        uuid patientId FK
+        uuid serviceId FK
+        uuid doctorId FK
+        datetime scheduledAt
+        enum status
+        string notes
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    MedicalNote {
+        uuid id PK
+        uuid patientId FK
+        uuid doctorId FK
+        string content
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Prescription {
+        uuid id PK
+        uuid patientId FK
+        uuid doctorId FK
+        string medication
+        string dosage
+        string instructions
+        enum status
+        datetime issuedAt
+        datetime expiresAt
+    }
+
+    %% =========================
+    %% TELEMEDICINE DOMAIN
+    %% =========================
+    TeleSession {
+        uuid id PK
+        uuid patientId FK
+        uuid doctorId FK
+        datetime startTime
+        datetime endTime
+        string sessionUrl
+        string recordingUrl
+        string notes
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    %% =========================
+    %% FINANCE DOMAIN
+    %% =========================
+    Payment {
+        uuid id PK
+        uuid appointmentId FK
+        uuid patientId FK
+        decimal amount
+        enum method
+        enum status
+        string transactionId
+        datetime paidAt
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Invoice {
+        uuid id PK
+        uuid paymentId FK
+        datetime issuedAt
+        datetime dueDate
+        decimal totalAmount
+        string pdfUrl
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    %% =========================
+    %% HOSPITAL DOMAIN
+    %% =========================
+    Hospital {
+        uuid id PK
+        string name
+        string cnpj UK
+        string address
+        string phone
+        string email
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    %% =========================
+    %% AUDIT DOMAIN
+    %% =========================
+    AuditLog {
+        uuid id PK
+        uuid userId FK
+        string action
+        string entity
+        string entityId
+        json metadata
+        datetime timestamp
+    }
+
+    %% =========================
+    %% RELATIONSHIPS
+    %% =========================
+    User ||--o{ AuthToken : has
+    User }o--|| Role : belongs_to
+    User }o--|| Hospital : works_at
+    User ||--o{ Appointment : attends_as_doctor
+    User ||--o{ MedicalNote : writes
+    User ||--o{ Prescription : issues
+    User ||--o{ TeleSession : conducts
+    User ||--o{ AuditLog : generates
+    
+    Patient }o--|| Hospital : registered_at
+    Patient ||--o{ Appointment : has
+    Patient ||--o{ Payment : makes
+    Patient ||--o{ MedicalNote : contains
+    Patient ||--o{ Prescription : receives
+    Patient ||--o{ TeleSession : participates_in
+    
+    Appointment }|--|| Service : for
+    Appointment ||--|| Patient : belongs_to
+    Appointment ||--|| User : with_doctor
+    Appointment ||--o| Payment : generates
+    
+    Payment ||--o| Invoice : produces
+    Payment }|--|| Appointment : for
+    Payment }|--|| Patient : by
+    
+    Hospital ||--o{ User : employs
+    Hospital ||--o{ Patient : serves
