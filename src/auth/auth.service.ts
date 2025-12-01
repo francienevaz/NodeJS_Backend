@@ -69,6 +69,9 @@ export class AuthService {
             email: user.email,
             role: user.role // Agora é o nome da role
         };
+
+        console.log('JWT Payload to sign:', payload); // Para debug
+
         return {
             access_token: this.jwtService.sign(payload),
         };

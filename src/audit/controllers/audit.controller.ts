@@ -1,10 +1,13 @@
 // src/audit/controllers/audit.controller.ts
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { AuditService } from '../services/audit.service';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { UserRole } from '../../../src/shared/enums/payment.enums';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('audit')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 export class AuditController {
     constructor(private readonly auditService: AuditService) { }

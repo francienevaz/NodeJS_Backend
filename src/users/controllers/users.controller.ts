@@ -14,6 +14,7 @@ import { UsersService } from '../users.service';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { UserRole } from '../../../src/shared/enums/payment.enums';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 type CreateUserDto = {
     email: string;
@@ -33,6 +34,7 @@ type UpdateUserDto = {
 };
 
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 @UseGuards(RolesGuard)
 @Roles(UserRole.ADMIN)
 export class UsersController {
